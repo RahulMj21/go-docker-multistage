@@ -1,0 +1,24 @@
+FROM golang:alpine AS stage_1
+
+WORKDIR /app
+
+COPY ./go.* ./
+
+RUN go mod download
+
+COPY . .
+
+RUN go build -o goapp .
+
+
+FROM alpine
+
+WORKDIR /app
+
+COPY --from=stage_1 ./app/goapp ./
+
+COPY --from=stage_1 /app/.env ./
+
+EXPOSE 8000
+
+CMD ["/app/goapp"]
